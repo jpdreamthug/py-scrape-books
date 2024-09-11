@@ -5,12 +5,21 @@ from scrapy.http import Response
 from scrape_books.items import Book
 
 
+RATING_MAP = {
+    "One": 1,
+    "Two": 2,
+    "Three": 3,
+    "Four": 4,
+    "Five": 5
+}
+
+
 class BooksSpider(scrapy.Spider):
     name = "books"
     start_urls = ["https://books.toscrape.com/"]
 
     def parse(
-        self, response: Response, **kwargs: Any
+            self, response: Response, **kwargs: Any
     ) -> Generator[scrapy.Request, None, None]:
         book_links = response.css(
             "article.product_pod h3 a::attr(href)"
@@ -64,14 +73,7 @@ class BooksSpider(scrapy.Spider):
             match = re.search(r"star-rating (\w+)", star_classes)
             if match:
                 rating = match.group(1)
-                rating_map = {
-                    "One": 1,
-                    "Two": 2,
-                    "Three": 3,
-                    "Four": 4,
-                    "Five": 5
-                }
-                return rating_map.get(rating, 0)
+                return RATING_MAP.get(rating, 0)
         return 0
 
     def extract_description(self, response: Response) -> str:
